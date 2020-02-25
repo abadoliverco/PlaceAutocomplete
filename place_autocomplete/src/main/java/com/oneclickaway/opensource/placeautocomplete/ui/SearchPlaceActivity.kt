@@ -49,6 +49,8 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
     private var apiKey: String? = null
     private var location: String? = null
     private var enclosingRadius: String? = null
+    private var withLocationOnly: Boolean? = false
+    private var withLocationDetail: Boolean? = true
 
     private var liveQueryInEditText: MutableLiveData<String> = MutableLiveData()
     /*view*/
@@ -163,6 +165,8 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
             location = configuration?.location
             enclosingRadius = configuration?.enclosingRadius
             searchTitleTV.text = configuration?.searchBarTitle
+            withLocationDetail = configuration?.withLocationDetail
+            withLocationOnly = configuration?.withLocationOnly
 
         } else {
             /*finish*/
@@ -344,8 +348,6 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
     }
 
 
-
-
     private fun setViewModel() {
         viewModel = ViewModelProviders.of(this).get(SearchPlacesViewModel::class.java)
     }
@@ -426,7 +428,9 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
         var apiKey: String,
         var location: String = "",
         var enclosingRadius: String = "",
-        var searchBarTitle: String = "Enter Location"
+        var searchBarTitle: String = "Enter Location",
+        var withLocationOnly: Boolean? = false,
+        var withLocationDetail: Boolean? = true
     ) : Parcelable {
 
         @Parcelize
@@ -435,6 +439,8 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
             var location: String = ""
             var enclosingRadius: String = ""
             var searchBarTitle: String = "Enter Location"
+            var withLocationOnly: Boolean = false
+            var withLocationDetails: Boolean = true
 
             /**
              *@author Burhan ud din ---> Set location in lat, lng which sorts location resulsts based on your lcoation
@@ -460,6 +466,18 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
                 return this
             }
 
+            fun onClickRecentWithLocationOnly(withLocation: Boolean): Builder {
+                this.withLocationOnly = withLocation
+                this.withLocationDetails = !withLocation
+                return this
+            }
+
+            fun onClickRecentWithLocationDetails(withDetails: Boolean): Builder {
+                this.withLocationDetails = withDetails
+                this.withLocationOnly = !withDetails
+                return this
+            }
+
             /**
              *@author Burhan ud din ---> Build the object
              */
@@ -468,14 +486,12 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
                     apiKey = apiKey,
                     enclosingRadius = enclosingRadius,
                     location = location,
-                    searchBarTitle = searchBarTitle
+                    searchBarTitle = searchBarTitle,
+                    withLocationOnly = withLocationOnly,
+                    withLocationDetail = withLocationDetails
                 )
             }
-
-
         }
-
-
     }
 
     private fun initDialogForGettingPlaceDetails() {
@@ -493,7 +509,36 @@ class SearchPlaceActivity : AppCompatActivity(), SearchPlaces.PlaceItemSelectedL
     override fun onRecantsItemSelected(savedItem: GroupStrategy.ListItem) {
         if (savedItem is GroupStrategy.GeneralItem) {
             /*tapped on place*/
-            getViewModel().requestPlaceDetails(savedItem.searchSelectedItem.placeId, apiKey!!)
+
+            when {
+                withLocationDetail!! && !withLocationOnly!! -> getViewModel().requestPlaceDetails(
+                    savedItem.searchSelectedItem.placeId,
+                    apiKey!!
+                )
+
+                !withLocationDetail!! && withLocationOnly!! -> {
+                    if (savedItem.searchSelectedItem != null) {
+                        val resultData = Intent()
+                        resultData.putExtra(
+                            SearchPlacesStatusCodes.PLACE_LOCATION,
+                            savedItem.searchSelectedItem
+                        )
+                        setResult(Activity.RESULT_OK, resultData)
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        finishAfterTransition()
+                    } else {
+                        finish()
+                        overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out)
+                    }
+                }
+
+                else -> getViewModel().requestPlaceDetails(
+                    savedItem.searchSelectedItem.placeId,
+                    apiKey!!
+                )
+            }
+
         } else {
             /*tapped on group title*/
         }

@@ -157,7 +157,6 @@ class SearchPlacesRepo(var application: Application) {
                 }
 
             })
-
     }
 
     /** @author @buren ---> {micro-service used to get recent searches}*/
@@ -196,9 +195,11 @@ class SearchPlacesRepo(var application: Application) {
             initDb()?.repDao()?.addSearchItem(
                 SearchSelectedItem(
                     placeId = it.placeId.toString(),
-                    mainText = it.name.toString(),
-                    secondaryText = it.formattedAddress.toString(),
-                    searchCurrentMilliseconds = System.currentTimeMillis()
+                    locationName = it.name.toString(),
+                    locationAddress = it.formattedAddress.toString(),
+                    searchCurrentMilliseconds = System.currentTimeMillis(),
+                    lat = it.geometry?.location?.lat,
+                    lon = it.geometry?.location?.lng
                 )
             )
         }
@@ -219,10 +220,7 @@ class SearchPlacesRepo(var application: Application) {
                 }
 
             })
-
-
     }
-
 
     private fun initDb(): RecentSearchesDB? {
         return RecentSearchesDB.getInstance(application)

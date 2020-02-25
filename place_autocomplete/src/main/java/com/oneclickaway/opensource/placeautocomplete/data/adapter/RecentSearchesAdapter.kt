@@ -43,9 +43,9 @@ class RecentSearchesAdapter(
         generalItemViewHolder: GeneralItemViewHolder,
         generalItem: GroupStrategy.GeneralItem
     ) {
-        generalItemViewHolder.recentPlaceTitleTV.text = generalItem.searchSelectedItem.mainText
+        generalItemViewHolder.recentPlaceTitleTV.text = generalItem.searchSelectedItem.locationName
         generalItemViewHolder.recentPlaceFormattedAddressTV.text =
-            generalItem.searchSelectedItem.secondaryText
+            generalItem.searchSelectedItem.locationAddress
     }
 
     private fun setDateView(dateViewHolder: DateViewHolder, dateItem: GroupStrategy.DateItem) {

@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import com.oneclickaway.opensource.placeautocomplete.data.api.bean.place_details.PlaceDetails
+import com.oneclickaway.opensource.placeautocomplete.data.model.room.SearchSelectedItem
 import com.oneclickaway.opensource.placeautocomplete.ui.SearchPlaceActivity
 import com.oneclickaway.opensource.placeautocomplete.utils.SearchPlacesStatusCodes
 
@@ -21,7 +22,7 @@ class ExampleLocationSearch : AppCompatActivity() {
     lateinit var searchLocationET: EditText
     lateinit var placeDetailsTV: TextView
 
-    var API_KEY = BuildConfig.ApiKey
+    var API_KEY = "" //your api key here
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +38,7 @@ class ExampleLocationSearch : AppCompatActivity() {
                 .setSearchBarTitle("Enter Source Location")
                 .setMyLocation("12.9716,77.5946")
                 .setEnclosingRadius("500")
+                .onClickRecentWithLocationOnly(true)
                 .build()
         )
 
@@ -54,25 +56,36 @@ class ExampleLocationSearch : AppCompatActivity() {
                 startActivityForResult(intent, 700)
                 overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out)
             }
-
-
         }
-
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == 700 && resultCode == Activity.RESULT_OK) {
 
             val placeDetails =
                 data?.getParcelableExtra<PlaceDetails>(SearchPlacesStatusCodes.PLACE_DATA)
 
-            searchLocationET.setText(placeDetails?.name)
+            val placeLocation =
+                data?.getParcelableExtra<SearchSelectedItem>(SearchPlacesStatusCodes.PLACE_LOCATION)
 
-            placeDetailsTV.text = placeDetails.toString()
-            Log.i(javaClass.simpleName, "onActivityResult: ${placeDetails}  ")
+
+            when {
+                placeDetails != null -> {
+                    searchLocationET.setText(placeDetails?.name)
+                    placeDetailsTV.text = placeDetails?.toString()
+                    Log.e(javaClass.simpleName, "onActivityResult: ${placeDetails}  ")
+                }
+                placeLocation != null -> {
+                    searchLocationET.setText(placeLocation?.locationName)
+                    placeDetailsTV.text = placeLocation?.toString()
+                    Log.e(javaClass.simpleName, "onActivityResult: ${placeLocation}  ")
+                }
+                else -> {
+                    Log.e("location data ","no date")
+                }
+            }
+
         }
     }
 }
