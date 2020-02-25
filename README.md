@@ -1,3 +1,6 @@
+I forked from https://github.com/Drabu/PlaceAutocomplete
+I just created a function that will return the LAT and LON from recent searches to avoid the calling of API again (to save money :D)
+
 PlaceAutocomplete
 ========
 Google Places Api Implementation
@@ -48,7 +51,7 @@ Add the dependency:
 
     dependencies {
     		//copy the version from download badge above 	
-		implementation 'com.opensource.oneclickaway.android.searchplaces:place_autocomplete:x.x.x'
+		implementation 'com.github.abadoliverco:PlaceAutocomplete:1.3.2'
 	 }
 
 Mandatory and optional parameters : 
